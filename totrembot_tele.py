@@ -5,6 +5,7 @@ from typing import Final
 from telegram import Bot, Update
 from telegram.ext import Application, Updater, CommandHandler, MessageHandler, filters, ContextTypes, CallbackContext
 import socket
+import threading
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -38,40 +39,43 @@ async def handle_client(conn, addr):
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
+            conn.send("MESSAGE RECEIVED").encode(FORMAT)
             if msg == DISCONNECT_MSG:
                 connected = False
             if msg == USER_WARNING:
                 await send_location()
+                connected = False
 
 
 #error return
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"Update {update} caused error {context.error}")
 
-async def run_bot():
+def run_bot():
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler('send_loc', send_location))
     app.add_error_handler(error)
 
     print("Polling...")
-    await app.run_polling(poll_interval=3)
+    app.run_polling(poll_interval=3)
 
 async def run_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
+    print("listening...")
     while True:
         conn, addr = server.accept()
+        await handle_client(conn, addr)
         asyncio.create_task(handle_client(conn, addr))
     
 
 
 if __name__ == '__main__':
-        loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(asyncio.gather(run_bot(), run_server()))
-        finally:
-            loop.close()
+        thread = threading.Thread(target=run_server)
+        thread.start()
+
+        run_bot()
     
     
