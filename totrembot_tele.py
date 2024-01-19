@@ -18,7 +18,7 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 USER_WARNING = "WARNING!"
-DISCONNECT_MSG = "!disconnect"
+DISCONNECT_MSG = "disconnect"
 
 
 
@@ -32,19 +32,18 @@ async def send_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[3]}, longitude: {lis[4]}")
 
 #socket server
-async def handle_client(conn, addr):
+def handle_client(conn, addr):
     connected = True
     while connected:
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
-            conn.send("MESSAGE RECEIVED").encode(FORMAT)
             if msg == DISCONNECT_MSG:
                 connected = False
             if msg == USER_WARNING:
-                await send_location()
-                connected = False
+                asyncio.create_task(send_location(None, None))
+    conn.close()
 
 
 #error return
@@ -60,21 +59,23 @@ def run_bot():
     print("Polling...")
     app.run_polling(poll_interval=3)
 
-async def run_server():
+def run_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
     server.listen()
     print("listening...")
+    
+
     while True:
         conn, addr = server.accept()
-        await handle_client(conn, addr)
-        asyncio.create_task(handle_client(conn, addr))
+        thread2 = threading.Thread(target=handle_client,args=(conn, addr))
+        thread2.start()
     
 
 
 if __name__ == '__main__':
-        thread = threading.Thread(target=run_server)
-        thread.start()
+        thread1 = threading.Thread(target=run_server)
+        thread1.start()
 
         run_bot()
     

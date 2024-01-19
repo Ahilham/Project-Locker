@@ -10,7 +10,7 @@ root = Tk()
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
-DISCONNECT_MSG = "!disconnect"
+DISCONNECT_MSG = "disconnect"
 USER_WARNING = "WARNING!"
 SERVER = socket.gethostbyname(socket.gethostname()) #use pv4 if local, use public ip if connection beyond local is needed
 ADDR = (SERVER, PORT)
@@ -57,16 +57,19 @@ def send_to_message_server():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(ADDR)
 
-        message = USER_WARNING.encode(FORMAT)
-        msg_length = len(message)
-        send_length = str(msg_length).encode(FORMAT)
-        send_length += b' ' * (HEADER - len(send_length))
-        client.send(send_length)
-        client.send(message)
-        client.send(DISCONNECT_MSG)
-        print(client.recv(2048).decode(FORMAT))
+        send(USER_WARNING, client)
+        send(DISCONNECT_MSG, client)
     except (ConnectionRefusedError, ConnectionError, TimeoutError) as e:
         print(f"Error connecting to the server: {e}")
+
+def send(mssg, clt):
+    message = mssg.encode(FORMAT)
+    msg_length = len(message)
+    send_length = str(msg_length).encode(FORMAT)
+    send_length += b' ' * (HEADER - len(send_length))
+    clt.send(send_length)
+    clt.send(message)
+    
 
 
 
