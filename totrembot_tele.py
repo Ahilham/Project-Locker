@@ -6,12 +6,24 @@ from telegram import Bot, Update
 from telegram.ext import Application, Updater, CommandHandler, MessageHandler, filters, ContextTypes, CallbackContext
 import socket
 import threading
+import requests
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+
 TOKEN: Final = "6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w"
 BOT_USERNAME: Final = '@totrembot'
+base_url = f"https://api.telegram.org/bot{TOKEN}"
+chat_id = None
+
+location = get_loc()
+lis = location.get_device_location()
+IP_device = f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[3]}, longitude: {lis[4]}"
+
+send_msg_url = base_url+f"/sendMessage?chat_id={chat_id}&text={IP_device}"
+
+
 HEADER = 64
 PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -29,7 +41,7 @@ bot = Bot(token = TOKEN)
 async def send_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     location = get_loc()
     lis = location.get_device_location()
-    await update.message.reply_text(f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[3]}, longitude: {lis[4]}")
+    await update.message.reply_text(IP_device)
 
 #socket server
 def handle_client(conn, addr):
@@ -42,7 +54,7 @@ def handle_client(conn, addr):
             if msg == DISCONNECT_MSG:
                 connected = False
             if msg == USER_WARNING:
-                asyncio.create_task(send_location(None, None))
+                requests.get(send_msg_url)
     conn.close()
 
 
@@ -50,14 +62,16 @@ def handle_client(conn, addr):
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"Update {update} caused error {context.error}")
 
-def run_bot():
-    app = Application.builder().token(TOKEN).build()
+# async def run_bot():
+#     app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler('send_loc', send_location))
-    app.add_error_handler(error)
+#     thread = threading.Thread(target=run_server)
 
-    print("Polling...")
-    app.run_polling(poll_interval=3)
+#     app.add_handler(CommandHandler('send_loc', send_location))
+#     app.add_error_handler(error)
+
+#     print("Polling...")
+#     app.run_polling(poll_interval=3)
 
 def run_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,15 +82,21 @@ def run_server():
 
     while True:
         conn, addr = server.accept()
-        thread2 = threading.Thread(target=handle_client,args=(conn, addr))
-        thread2.start()
+        handle_client(conn, addr)
     
 
-
 if __name__ == '__main__':
-        thread1 = threading.Thread(target=run_server)
-        thread1.start()
+    app = Application.builder().token(TOKEN).build()
 
-        run_bot()
+    thread = threading.Thread(target=run_server)
+    thread.start()
+
+    app.add_handler(CommandHandler('send_loc', send_location))
+    app.add_error_handler(error)
+
+    print("Polling...")
+    app.run_polling(poll_interval=3)
+    #set up an input for chat_id
+
     
     
