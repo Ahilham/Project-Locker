@@ -7,6 +7,7 @@ from telegram.ext import Application, Updater, CommandHandler, MessageHandler, f
 import socket
 import threading
 import requests
+import time
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -15,13 +16,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 TOKEN: Final = "6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w"
 BOT_USERNAME: Final = '@totrembot'
 base_url = f"https://api.telegram.org/bot{TOKEN}"
+update_url = "https://api.telegram.org/bot6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w/getUpdates"
 chat_id = None
+send_msg_url = None
 
 location = get_loc()
 lis = location.get_device_location()
 IP_device = f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[3]}, longitude: {lis[4]}"
 
-send_msg_url = base_url+f"/sendMessage?chat_id={chat_id}&text={IP_device}"
+
 
 
 HEADER = 64
@@ -36,15 +39,44 @@ DISCONNECT_MSG = "disconnect"
 
 bot = Bot(token = TOKEN)
 
+
+
 #commands
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hello Sir/Miss, how can i help you?")
+
+    global send_msg_url
+    global chat_id
+    global IP_device
+
+    time.sleep(5)
+
+    response = requests.get(update_url)
+
+    if response.status_code == 200:
+        json_data = response.json()
+
+        chat_id = json_data["result"][0]["message"]["chat"]["id"]
+
+    send_msg_url = base_url+f"/sendMessage?chat_id={chat_id}&text={IP_device}"
+
+
 
 async def send_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     location = get_loc()
     lis = location.get_device_location()
     await update.message.reply_text(IP_device)
 
+async def send_chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if chat_id:
+        await update.message.reply_text(chat_id) 
+    else:
+        await update.message.reply_text("ERROR: No chat id is present.")
+
 #socket server
 def handle_client(conn, addr):
+    global send_msg_url
+
     connected = True
     while connected:
         msg_length = conn.recv(HEADER).decode(FORMAT)
@@ -62,16 +94,6 @@ def handle_client(conn, addr):
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"Update {update} caused error {context.error}")
 
-# async def run_bot():
-#     app = Application.builder().token(TOKEN).build()
-
-#     thread = threading.Thread(target=run_server)
-
-#     app.add_handler(CommandHandler('send_loc', send_location))
-#     app.add_error_handler(error)
-
-#     print("Polling...")
-#     app.run_polling(poll_interval=3)
 
 def run_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,11 +114,15 @@ if __name__ == '__main__':
     thread.start()
 
     app.add_handler(CommandHandler('send_loc', send_location))
+    app.add_handler(CommandHandler('send_chat_id', send_chat_id))
+    app.add_handler(CommandHandler('start', start_command))
     app.add_error_handler(error)
 
     print("Polling...")
     app.run_polling(poll_interval=3)
-    #set up an input for chat_id
+
+    
+    
 
     
     
