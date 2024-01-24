@@ -1,9 +1,8 @@
 import logging
-import asyncio
 from get_location import get_loc
 from typing import Final
 from telegram import Bot, Update
-from telegram.ext import Application, Updater, CommandHandler, MessageHandler, filters, ContextTypes, CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes
 import socket
 import threading
 import requests
@@ -13,10 +12,10 @@ import time
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
-TOKEN: Final = "6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w"
-BOT_USERNAME: Final = '@totrembot'
+TOKEN: Final = "6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w" # bot token
+BOT_USERNAME: Final = '@totrembot' # bot username
 base_url = f"https://api.telegram.org/bot{TOKEN}"
-update_url = "https://api.telegram.org/bot6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w/getUpdates"
+update_url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 chat_id = None
 send_msg_url = None
 
@@ -63,8 +62,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def send_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    location = get_loc()
-    lis = location.get_device_location()
     await update.message.reply_text(IP_device)
 
 async def send_chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE):

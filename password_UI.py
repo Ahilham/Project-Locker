@@ -100,9 +100,28 @@ def check_password( stored_hashed_password: str):
 
 enterButton = Button(root, text="Enter", command=lambda: check_password(PASSWORD) )
 enterButton.place(x=width/2, y=height/2+25)
-if PASSWORD is None:
-    createButton = Button(root, text="Create Password", command=open_create_password_wind)
-    createButton.place(x=width/2, y=height/2+50)
+
+
+
+
+
+label_button = "Create Password"
+createButton = Button(root, text=label_button, command=open_create_password_wind)
+createButton.place(x=width/2, y=height/2+50)
+
+# update createButton text
+def update_create_button():
+    global label_button
+    if PASSWORD is None:
+        label_button = "Create Password"
+    else:
+        label_button = "Change Password"
+
+    createButton.config(text=label_button)
+    root.after(1000, update_create_button)
+
+update_create_button()
+    
 
 if __name__ == "__main__":
     root.mainloop()
