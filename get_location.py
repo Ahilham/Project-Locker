@@ -25,5 +25,6 @@ class get_loc():
 
 
 if __name__ == '__main__':
-    print(get_device_location())
+    test = get_loc()
+    print(test.get_device_location())
     

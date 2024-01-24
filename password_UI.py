@@ -23,7 +23,7 @@ PASSWORD = None
 
 root.title("PROJECT LOCKER")
 
-# root.attributes("-fullscreen", True)
+root.attributes("-fullscreen", True)
 
 
 e =Entry(root, width=50)

@@ -21,7 +21,7 @@ send_msg_url = None
 
 location = get_loc()
 lis = location.get_device_location()
-IP_device = f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[3]}, longitude: {lis[4]}"
+IP_device = f"City: {lis[0]}, region: {lis[1]}, country: {lis[2]}, lattitude: {lis[4]}, longitude: {lis[5]}"
 
 
 
