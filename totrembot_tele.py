@@ -12,8 +12,8 @@ import time
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
-TOKEN: Final = "6857877317:AAE6GJNZJGAlce7Wm86RxWX0hPxkgazV74w" # bot token
-BOT_USERNAME: Final = '@totrembot' # bot username
+TOKEN: Final = "yur bot token" # bot token
+BOT_USERNAME: Final = 'your bot username' # bot username
 base_url = f"https://api.telegram.org/bot{TOKEN}"
 update_url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 chat_id = None
