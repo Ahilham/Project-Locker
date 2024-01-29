@@ -7,7 +7,7 @@ The program uses Tkinter to create a simple password input UI. It allows user to
 ## Table of Contents
 
 1. [Telegram Bot with Location Tracking](#1-telegram-bot-with-location-tracking)
-2. [Tkinter-based Password Management](#2-tkinter-based-password-management)
+2. [Tkinter-based password input UI](#2-tkinter-based-password-input-UI)
 
 ## 1. Telegram Bot with Location Tracking
 
@@ -39,7 +39,7 @@ This Python script implements a Telegram bot that provides location information 
 - **Dependencies**: Ensure required dependencies are installed using `pip install -r requirements.txt`.
 - **Security**: Take precautions with sensitive information, such as the bot token.
 
-## 2. Tkinter-based Password input UI
+## 2. Tkinter-based password input UI
 
 ### Overview
 
