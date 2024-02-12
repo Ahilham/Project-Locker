@@ -1,7 +1,7 @@
 from tkinter import *
 import socket
 import hashlib
-import threading
+import keyboard
 
 
 
@@ -24,6 +24,7 @@ PASSWORD = None
 root.title("PROJECT LOCKER")
 
 root.attributes("-fullscreen", True)
+
 
 
 e =Entry(root, width=50)
@@ -74,7 +75,9 @@ def send(mssg, clt):
 
 
 #functions for main_window
-
+    
+def on_closing():
+    pass
 
 def hash_password(password: str):
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
@@ -91,16 +94,15 @@ def check_password( stored_hashed_password: str):
         count += 1
         if count > 2:
             send_to_message_server()
-            
 
 
-    
 
 
 
 enterButton = Button(root, text="Enter", command=lambda: check_password(PASSWORD) )
 enterButton.place(x=width/2, y=height/2+25)
 
+root.protocol("WM_DELETE_WINDOW", on_closing)
 
 
 
@@ -124,4 +126,11 @@ update_create_button()
     
 
 if __name__ == "__main__":
+    keyboard.block_key('tab')
+    keyboard.block_key('alt')
+
     root.mainloop()
+
+    
+
+    
